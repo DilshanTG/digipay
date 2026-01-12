@@ -1,0 +1,24 @@
+<!-- This is the index.php, I've added this coz stupid git is naming this Gist as index if i named the 
+first file as index.php, so now you know, Enjoye the coding guys : ) let me know if there are any errors -->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Payment Page</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="body">
+        <div>
+            <button onclick="paymentGateway()">Pay here</button>
+        </div>
+    </div>
+
+    <!-- Including the PayHere SDK -->
+    <script src="https://www.payhere.lk/lib/payhere.js"></script>
+    <script src="Payment.js"></script>
+</body>
+</html>

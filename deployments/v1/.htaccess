@@ -1,0 +1,26 @@
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+
+    # 1. Force HTTPS
+    RewriteCond %{HTTPS} off
+    RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+
+    # 2. Block access to sensitive files
+    <FilesMatch "^\.env|composer\.(json|lock)|package-lock\.json|artisan|phpunit\.xml">
+        Order allow,deny
+        Deny from all
+    </FilesMatch>
+
+    # 3. Block access to hidden directories
+    RewriteRule ^(\.git|\.agent|\.gemini) - [F]
+
+    # 4. Routing everything to the public folder
+    # Only redirect if the requested file/directory does not exist in root
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteCond %{REQUEST_FILENAME} !-d
+    RewriteCond %{REQUEST_URI} !^/public/
+    RewriteRule ^(.*)$ public/$1 [L]
+</IfModule>
+
+# Disable directory listing
+Options -Indexes
