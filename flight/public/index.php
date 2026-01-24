@@ -277,6 +277,14 @@ Flight::route('GET /pay/jump/@token', function($token) {
         return;
     }
 
+    // Check if merchant is in sandbox mode
+    $merchant = Merchant::find($payment->merchant_id);
+    if ($merchant && $merchant->sandbox_mode) {
+        // Show sandbox test page instead of redirecting to PayHere
+        Flight::render('payment/sandbox_test', ['payment' => $payment]);
+        return;
+    }
+
     $payhere = Flight::payhere();
     $hash = $payhere->generateHash($payment->order_id, $payment->amount, $payment->currency);
 
@@ -343,6 +351,55 @@ Flight::route('POST /notify', function() {
     }
 
     echo 'OK';
+});
+
+// POST /sandbox/callback - Sandbox Test Payment Callback
+Flight::route('POST /sandbox/callback', function() {
+    $request = Flight::request();
+    $postData = $request->data->getData();
+
+    $orderId = $postData['order_id'] ?? '';
+    $statusCode = intval($postData['status_code'] ?? 0);
+
+    $payment = Payment::where('order_id', $orderId);
+
+    if (!$payment) {
+        Flight::halt(404, 'Payment not found');
+        return;
+    }
+
+    // Verify merchant is in sandbox mode
+    $merchant = Merchant::find($payment->merchant_id);
+    if (!$merchant || !$merchant->sandbox_mode) {
+        Flight::halt(403, 'Sandbox mode not enabled');
+        return;
+    }
+
+    Logger::info("Sandbox Payment Test: Order={$orderId}, StatusCode={$statusCode}");
+
+    // Generate a fake PayHere payment ID
+    $fakePaymentId = 'PY-SANDBOX-' . strtoupper(bin2hex(random_bytes(4)));
+
+    // Update payment based on status code
+    if ($statusCode == 2) {
+        // Success
+        $paymentService = Flight::paymentService();
+        $paymentService->completePayment($payment, $fakePaymentId);
+    } elseif ($statusCode == -1) {
+        // Cancelled
+        $payment->status = 'CANCELLED';
+        $payment->update();
+    } elseif ($statusCode == -2) {
+        // Failed
+        $payment->status = 'FAILED';
+        $payment->update();
+    } elseif ($statusCode == 0) {
+        // Keep pending (do nothing)
+        Logger::info("Payment kept in PENDING state for testing");
+    }
+
+    // Redirect to return URL
+    Flight::redirect('/return?order_id=' . $orderId . ($statusCode == -1 ? '&cancelled=1' : ''));
 });
 
 // GET /return - Return Handler

@@ -7,6 +7,7 @@ A blazing-fast payment gateway wrapper built with FlightPHP for PayHere (Sri Lan
 - **Ultra-Fast Performance**: Built with FlightPHP micro-framework for maximum speed
 - **PayHere Integration**: Complete PayHere payment gateway integration
 - **API & Direct Modes**: Supports both API integration and direct payment forms
+- **🧪 Sandbox Mode**: Test payments with fake payment simulator (no real PayHere needed!)
 - **SMS Notifications**: Automatic SMS notifications to customers and admin
 - **WhatsApp Receipts**: Auto-generated JPG receipts
 - **Webhook Support**: PayHere-compatible webhooks for merchant callbacks
@@ -142,6 +143,23 @@ GET /api/v1/status/{order_id}
 Default credentials:
 - **Username**: admin
 - **Password**: Set in `.env` (`ADMIN_PASSWORD`)
+
+## 🧪 Sandbox Mode (Testing Without PayHere)
+
+Enable sandbox mode to test payments without connecting to PayHere! Perfect for development and integration testing.
+
+**Enable for a merchant:**
+```sql
+sqlite3 flight/database/database.sqlite "UPDATE merchants SET sandbox_mode = 1 WHERE id = 1"
+```
+
+When enabled, users see a **fake payment simulator** with buttons to test:
+- ✅ Payment Success
+- ↺ Payment Cancelled
+- ✗ Payment Failed
+- ⏱ Keep Pending
+
+All webhooks and return URLs work exactly like real PayHere! See **[SANDBOX_GUIDE.md](SANDBOX_GUIDE.md)** for complete details.
 
 ## Configuration
 

@@ -83,6 +83,7 @@ $pdo->exec("
         cancel_url TEXT,
         notify_url TEXT,
         is_active INTEGER DEFAULT 1,
+        sandbox_mode INTEGER DEFAULT 0,
         created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
         updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
     )

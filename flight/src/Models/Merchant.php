@@ -15,11 +15,13 @@ class Merchant extends Model
         'cancel_url',
         'notify_url',
         'is_active',
+        'sandbox_mode',
     ];
 
     protected array $casts = [
         'allowed_domains' => 'array',
         'is_active' => 'boolean',
+        'sandbox_mode' => 'boolean',
     ];
 
     public function payments(): array
