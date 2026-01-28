@@ -128,7 +128,11 @@ if ($is_mysql) {
     try { $pdo->exec("ALTER TABLE settings ADD UNIQUE (`key`)"); } catch(Exception $e) {}
     try { $pdo->exec("ALTER TABLE users ADD UNIQUE (email)"); } catch(Exception $e) {}
 } else {
-    // Unique indexing is usually handled in the CREATE TABLE for SQLite but we ensure it here if needed
+    // SQLite unique indexes
+    try { $pdo->exec("CREATE UNIQUE INDEX IF NOT EXISTS idx_merchants_api_key ON merchants(api_key)"); } catch(Exception $e) {}
+    try { $pdo->exec("CREATE UNIQUE INDEX IF NOT EXISTS idx_payments_order_id ON payments(order_id)"); } catch(Exception $e) {}
+    try { $pdo->exec("CREATE UNIQUE INDEX IF NOT EXISTS idx_settings_key ON settings(`key`)"); } catch(Exception $e) {}
+    try { $pdo->exec("CREATE UNIQUE INDEX IF NOT EXISTS idx_users_email ON users(email)"); } catch(Exception $e) {}
 }
 
 echo "Database initialized successfully!\n";

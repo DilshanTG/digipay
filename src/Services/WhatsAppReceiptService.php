@@ -158,6 +158,14 @@ class WhatsAppReceiptService
 
     private function imagefilledroundedrectangle($img, $x1, $y1, $x2, $y2, $radius, $color)
     {
-        imagefilledrectangle($img, $x1, $y1, $x2, $y2, $color);
+        // Draw the main rectangle body
+        imagefilledrectangle($img, $x1 + $radius, $y1, $x2 - $radius, $y2, $color);
+        imagefilledrectangle($img, $x1, $y1 + $radius, $x2, $y2 - $radius, $color);
+
+        // Draw the four corners as filled arcs
+        imagefilledellipse($img, $x1 + $radius, $y1 + $radius, $radius * 2, $radius * 2, $color);
+        imagefilledellipse($img, $x2 - $radius, $y1 + $radius, $radius * 2, $radius * 2, $color);
+        imagefilledellipse($img, $x1 + $radius, $y2 - $radius, $radius * 2, $radius * 2, $color);
+        imagefilledellipse($img, $x2 - $radius, $y2 - $radius, $radius * 2, $radius * 2, $color);
     }
 }

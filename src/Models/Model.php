@@ -96,7 +96,14 @@ abstract class Model
     public static function where(string $column, $value): ?self
     {
         $instance = new static();
-        $stmt = self::db()->prepare("SELECT * FROM {$instance->table} WHERE {$column} = ? LIMIT 1");
+
+        // Sanitize column name to prevent SQL injection
+        $column = preg_replace('/[^a-zA-Z0-9_]/', '', $column);
+        if (empty($column)) {
+            return null;
+        }
+
+        $stmt = self::db()->prepare("SELECT * FROM {$instance->table} WHERE `{$column}` = ? LIMIT 1");
         $stmt->execute([$value]);
         $result = $stmt->fetch();
 
@@ -106,7 +113,14 @@ abstract class Model
     public static function whereAll(string $column, $value): array
     {
         $instance = new static();
-        $stmt = self::db()->prepare("SELECT * FROM {$instance->table} WHERE {$column} = ?");
+
+        // Sanitize column name to prevent SQL injection
+        $column = preg_replace('/[^a-zA-Z0-9_]/', '', $column);
+        if (empty($column)) {
+            return [];
+        }
+
+        $stmt = self::db()->prepare("SELECT * FROM {$instance->table} WHERE `{$column}` = ?");
         $stmt->execute([$value]);
         $results = $stmt->fetchAll();
 
@@ -130,10 +144,13 @@ abstract class Model
             $columns = array_keys($this->attributes);
             $placeholders = array_fill(0, count($columns), '?');
 
+            // Wrap column names in backticks to handle reserved words
+            $quotedColumns = array_map(fn($col) => "`{$col}`", $columns);
+
             $sql = sprintf(
                 "INSERT INTO %s (%s) VALUES (%s)",
                 $this->table,
-                implode(', ', $columns),
+                implode(', ', $quotedColumns),
                 implode(', ', $placeholders)
             );
 
@@ -150,10 +167,15 @@ abstract class Model
         });
     }
 
-    public function update(): bool
+    public function update(array $attributes = []): bool
     {
         if (!isset($this->attributes[$this->primaryKey])) {
             return false;
+        }
+
+        // If attributes provided, fill them first
+        if (!empty($attributes)) {
+            $this->fill($attributes);
         }
 
         if ($this->timestamps) {
@@ -166,7 +188,7 @@ abstract class Model
 
             foreach ($this->attributes as $key => $value) {
                 if ($key !== $this->primaryKey) {
-                    $sets[] = "{$key} = ?";
+                    $sets[] = "`{$key}` = ?";
                     $values[] = $this->prepareForDb($key);
                 }
             }

@@ -74,7 +74,7 @@ class PaymentService
 
         // 2. Admin SMS
         try {
-            $adminPhone = '94774665742';
+            $adminPhone = $_ENV['SMS_ADMIN_PHONE'] ?? $_ENV['WHATSAPP_ADMIN_NUMBER'] ?? '94774665742';
             $adminMsg = "New Payment Received!\n\n";
             $adminMsg .= "Customer: $customerName\n";
             $adminMsg .= "Amount: Rs " . number_format($payment->amount, 2) . "\n";
