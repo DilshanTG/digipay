@@ -742,9 +742,13 @@ Flight::route('GET /admin/merchants', function() {
 // POST /admin/merchants/save - Create or Update Merchant
 Flight::route('POST /admin/merchants/save', function() {
     $data = Flight::request()->data->getData();
-    
+
     $isUpdate = (isset($data['id']) && !empty($data['id']));
-    
+
+    // Debug: log incoming checkbox states
+    Logger::info("Merchant Save - sandbox_mode in data: " . (isset($data['sandbox_mode']) ? 'YES='.$data['sandbox_mode'] : 'NO'));
+    Logger::info("Merchant Save - is_active in data: " . (isset($data['is_active']) ? 'YES='.$data['is_active'] : 'NO'));
+
     $merchantData = [
         'name' => $data['name'] ?? '',
         'allowed_domains' => array_map('trim', explode(',', $data['allowed_domains'] ?? '*')),
@@ -755,14 +759,23 @@ Flight::route('POST /admin/merchants/save', function() {
         'sandbox_mode' => isset($data['sandbox_mode']) ? 1 : 0
     ];
 
+    Logger::info("Merchant Save - Final sandbox_mode value: " . $merchantData['sandbox_mode']);
+
     if ($isUpdate) {
         $merchant = Merchant::find($data['id']);
         if ($merchant) {
+            Logger::info("Merchant Update - ID: {$data['id']}, Current sandbox_mode in DB: " . var_export($merchant->sandbox_mode, true));
+
             // Only update keys if explicitly provided (though usually handled via regenerate)
             if (!empty($data['api_key'])) $merchantData['api_key'] = $data['api_key'];
             if (!empty($data['secret_key'])) $merchantData['secret_key'] = $data['secret_key'];
-            
-            $merchant->update($merchantData);
+
+            $result = $merchant->update($merchantData);
+            Logger::info("Merchant Update - Result: " . ($result ? 'SUCCESS' : 'FAILED'));
+
+            // Verify the update worked
+            $verify = Merchant::find($data['id']);
+            Logger::info("Merchant Update - Verification after reload: sandbox_mode = " . var_export($verify->sandbox_mode, true));
         }
     } else {
         // Auto-generate keys for new merchant (Matching Laravel exactly)

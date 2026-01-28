@@ -211,6 +211,8 @@
         }
 
         function editMerchant(merchant) {
+            console.log('Edit Merchant - sandbox_mode:', merchant.sandbox_mode, 'type:', typeof merchant.sandbox_mode);
+
             document.getElementById('modalTitle').innerText = 'Edit Merchant';
             document.getElementById('merchant_id').value = merchant.id;
             document.getElementById('merchant_name').value = merchant.name;
@@ -220,8 +222,9 @@
             document.getElementById('merchant_return_url').value = merchant.return_url || '';
             document.getElementById('merchant_cancel_url').value = merchant.cancel_url || '';
             document.getElementById('merchant_notify_url').value = merchant.notify_url || '';
-            document.getElementById('merchant_active').checked = merchant.is_active;
-            document.getElementById('merchant_sandbox').checked = merchant.sandbox_mode;
+            // Use Boolean conversion to handle 0/1 integers and true/false booleans
+            document.getElementById('merchant_active').checked = Boolean(merchant.is_active);
+            document.getElementById('merchant_sandbox').checked = Boolean(merchant.sandbox_mode);
             
             document.getElementById('keyFields').classList.remove('hidden');
             document.getElementById('newMerchantNote').classList.add('hidden');
