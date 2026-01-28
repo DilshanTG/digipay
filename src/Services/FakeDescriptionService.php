@@ -54,11 +54,11 @@ class FakeDescriptionService
     {
         return [
             '{name} - graphics design',
-            '{mobile} grafic work',
-            '{email} desgin payment',
+            '{mobile} graphic work',
+            '{email} design payment',
             'social media post - {name}',
             '{mobile} insta post',
-            'logo desing {name}'
+            'logo design {name}'
         ];
     }
 
@@ -67,7 +67,7 @@ class FakeDescriptionService
         return [
             '{name} - email template',
             '{mobile} newsletter template',
-            'professional sigature - {name}',
+            'professional signature - {name}',
             '{email} email campaign',
             'sms marketing - {name}'
         ];

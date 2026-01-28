@@ -43,6 +43,8 @@ class Database
                 $config['mysql']['password'],
                 $config['mysql']['options']
             );
+            self::$pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+            self::$pdo->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
         } else {
             throw new \Exception("Unsupported database driver: {$driver}");
         }

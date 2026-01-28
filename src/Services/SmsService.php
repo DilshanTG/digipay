@@ -14,7 +14,12 @@ class SmsService
         $this->endpoint = $_ENV['SMS_API_ENDPOINT'] ?? 'https://dashboard.smsapi.lk/api/v3/sms/send';
         $this->token = $_ENV['SMS_API_TOKEN'] ?? '';
         $this->senderId = $_ENV['SMS_SENDER_ID'] ?? 'DIGIMART';
-        $this->enabled = filter_var($_ENV['SMS_ENABLED'] ?? true, FILTER_VALIDATE_BOOLEAN);
+
+        // SMS is enabled only if explicitly enabled AND token is configured
+        $envEnabled = isset($_ENV['SMS_ENABLED'])
+            ? filter_var($_ENV['SMS_ENABLED'], FILTER_VALIDATE_BOOLEAN)
+            : true;
+        $this->enabled = $envEnabled && !empty($this->token);
 
         $maskedToken = $this->token ? substr($this->token, 0, 5) . '...' . substr($this->token, -5) : 'MISSING';
         Logger::info("SmsService Initialized: Endpoint={$this->endpoint}, SenderID={$this->senderId}, Enabled=" . ($this->enabled ? 'YES' : 'NO') . ", Token={$maskedToken}");

@@ -84,7 +84,8 @@ $base = str_replace('\\', '/', dirname($scriptName));
 if (basename($base) === 'public') {
     $base = dirname($base);
 }
-if ($base === DIRECTORY_SEPARATOR || $base === '.') $base = '';
+// After str_replace, base is always forward-slash based, so check for '/' not DIRECTORY_SEPARATOR
+if ($base === '/' || $base === '.') $base = '';
 
 // If the URL matches the base but Flight doesn't see it (common with root .htaccess)
 if (!empty($base) && strpos($requestUri, $base) === 0) {
@@ -368,8 +369,6 @@ Flight::route('POST /notify', function() {
 
     Logger::info('PayHere Webhook: ' . json_encode($postData));
 
-    Logger::info('PayHere Webhook: ' . json_encode($postData));
-
     // 1. Lookup Payment First (to find the merchant)
     $payment = Payment::where('order_id', $postData['order_id'] ?? '');
 
@@ -545,6 +544,7 @@ function handleReturnLogic($payment) {
 
         $separator = (parse_url($payment->redirect_url, PHP_URL_QUERY) == NULL) ? '?' : '&';
 
+        $meta = $payment->meta_data ?? [];
         $params = http_build_query([
             'status' => $status,
             'merchant_id' => $merchantId,
@@ -554,8 +554,8 @@ function handleReturnLogic($payment) {
             'payhere_currency' => $payhereCurrency,
             'status_code' => $statusCode,
             'md5sig' => $md5sig,
-            'custom_1' => $payment->meta_data['custom_1'] ?? '',
-            'custom_2' => $payment->meta_data['custom_2'] ?? ''
+            'custom_1' => $meta['custom_1'] ?? '',
+            'custom_2' => $meta['custom_2'] ?? ''
         ]);
 
         $finalUrl = $payment->redirect_url . $separator . $params;
