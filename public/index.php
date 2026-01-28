@@ -267,7 +267,7 @@ Flight::route('POST /pay/process', function() {
     if (!$merchant) {
         $merchant = Merchant::where('name', 'DigiMart System');
     }
-    
+
     if (!$merchant) {
         try {
             $merchant = Merchant::create([
@@ -284,8 +284,16 @@ Flight::route('POST /pay/process', function() {
         }
     }
 
+    // Ensure we have a valid merchant ID
+    $merchantId = $merchant->id ?? $merchant->attributes['id'] ?? null;
+    if (!$merchantId) {
+        Logger::error('Merchant ID is null. Merchant data: ' . json_encode($merchant->toArray()));
+        Flight::halt(500, 'System Configuration Error: Invalid merchant configuration.');
+        return;
+    }
+
     $payment = Payment::create([
-        'merchant_id' => $merchant->id,
+        'merchant_id' => $merchantId,
         'order_id' => $orderId,
         'amount' => $totalAmount,
         'currency' => 'LKR',
