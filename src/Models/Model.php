@@ -15,11 +15,31 @@ abstract class Model
     protected array $attributes = [];
     public bool $timestamps = true;
 
-    public function __construct(array $attributes = [])
+    public function __construct(array $attributes = [], bool $fromDatabase = false)
     {
-        $this->fill($attributes);
+        if ($fromDatabase) {
+            // When loading from database, include all attributes (id, timestamps, etc.)
+            $this->hydrate($attributes);
+        } else {
+            // When creating from user input, respect fillable
+            $this->fill($attributes);
+        }
     }
 
+    /**
+     * Hydrate model with all attributes from database (bypasses fillable)
+     */
+    public function hydrate(array $attributes): self
+    {
+        foreach ($attributes as $key => $value) {
+            $this->attributes[$key] = $this->castAttribute($key, $value);
+        }
+        return $this;
+    }
+
+    /**
+     * Fill model with user-provided attributes (respects fillable)
+     */
     public function fill(array $attributes): self
     {
         foreach ($attributes as $key => $value) {
@@ -80,7 +100,7 @@ abstract class Model
         $stmt = self::db()->query("SELECT * FROM {$instance->table}");
         $results = $stmt->fetchAll();
 
-        return array_map(fn($row) => new static($row), $results);
+        return array_map(fn($row) => new static($row, true), $results);
     }
 
     public static function find($id): ?self
@@ -90,7 +110,7 @@ abstract class Model
         $stmt->execute([$id]);
         $result = $stmt->fetch();
 
-        return $result ? new static($result) : null;
+        return $result ? new static($result, true) : null;
     }
 
     public static function where(string $column, $value): ?self
@@ -107,7 +127,7 @@ abstract class Model
         $stmt->execute([$value]);
         $result = $stmt->fetch();
 
-        return $result ? new static($result) : null;
+        return $result ? new static($result, true) : null;
     }
 
     public static function whereAll(string $column, $value): array
@@ -124,7 +144,7 @@ abstract class Model
         $stmt->execute([$value]);
         $results = $stmt->fetchAll();
 
-        return array_map(fn($row) => new static($row), $results);
+        return array_map(fn($row) => new static($row, true), $results);
     }
 
     public function save(): bool
