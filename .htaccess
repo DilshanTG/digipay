@@ -1,0 +1,13 @@
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteBase /v2/
+    
+    # Ensure Authorization header is passed
+    CGIPassAuth On
+    
+    # Pass Authorization Header to public/
+    RewriteCond %{HTTP:Authorization} .
+    RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
+    
+    RewriteRule ^(.*)$ public/$1 [L]
+</IfModule>

@@ -1,0 +1,13 @@
+RewriteEngine On
+RewriteBase /v2/public/
+
+# Ensure Authorization header is passed
+CGIPassAuth On
+
+# Pass Authorization Header to PHP
+RewriteCond %{HTTP:Authorization} .
+RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
+
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^(.*)$ index.php [QSA,L]

@@ -1,0 +1,14 @@
+vendor/
+.env
+.env.backup
+composer.lock
+*.zip
+*.sql
+.DS_Store
+storage/logs/*.log
+.agent/
+.shared/
+brain/
+implementation_plan.md
+task.md
+walkthrough.md
